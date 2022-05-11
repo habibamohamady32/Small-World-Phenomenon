@@ -18,10 +18,11 @@ class graph
     static public void Main(String[] args)
     {
         read();
+         Console.WriteLine("finished");
     }
     static void read()
     {
-        string text = File.ReadAllText(@"Movies193.txt");
+        string text = File.ReadAllText(@"movies1.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         
@@ -79,24 +80,37 @@ class graph
          {
               Console.WriteLine(e2+"/"+weight[e2]);
          }*/
-     string text2 = File.ReadAllText(@"queries110.txt");
+     string text2 = File.ReadAllText(@"queries1.txt");
         string[] queries = text2.Split('\n');
-
-        for (int i = 0; i < queries.Length; i++)
+        text2 = File.ReadAllText(@"queries1 - Solution.txt");
+        string[] sol = text2.Split('\n');
+        for (int i = 0; i < queries.Length - 1; i++)
         {
             string[] values = queries[i].Trim().Split('/');
             string src = values[0];
             string dst = values[1];
             Dictionary<string,int> level = dos(src, dst);
-            Console.WriteLine(src + "/" + dst);
-            Console.WriteLine("dos = " + level[dst]);
+            //Console.WriteLine(src + "/" + dst);
+            //Console.WriteLine("dos = " + level[dst]);
             if (src == "Hall, Douglas Kent")
                 _ = 1;
             rs(src, dst, level);
             Tuple<string,string> strength = new Tuple<string,string>(src, dst);
-            Console.WriteLine("rs = " + weight[strength]);
+            //Console.WriteLine("rs = " + weight[strength]);
+            string []sol2 = sol[i].Trim().Split();
 
-
+           // Console.WriteLine("solution is");
+            int x = Int32.Parse(sol2[2]);
+            int y = Int32.Parse(sol2[4]);
+           Console.WriteLine("Answer is: " + x + " " + y);
+            if (x == level[dst] && y == weight[strength])
+            {
+                Console.WriteLine("Case: " + i + " Accepted");
+            }
+            else {
+                Console.WriteLine("Wrong Answer Case: " + i);
+            }
+            
         }
     }
      public static Dictionary<string,int> dos(string src, string dist)

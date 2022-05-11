@@ -24,7 +24,7 @@ class graph
     }
     static void read()
     {
-        string text = File.ReadAllText(@"Movies967.txt");
+        string text = File.ReadAllText(@"Movies122806.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         
@@ -91,9 +91,9 @@ class graph
          {
               Console.WriteLine(e2+"/"+weight[e2]);
          }*/
-     string text2 = File.ReadAllText(@"queries4000.txt");
+     string text2 = File.ReadAllText(@"queries22.txt");
         string[] queries = text2.Split('\n');
-        text2 = File.ReadAllText(@"queries4000 - Solution.txt");
+        text2 = File.ReadAllText(@"queries22 - Solution.txt");
         string[] sol = text2.Split('\n');
         for (int i = 0; i < queries.Length - 1; i++)
         {
@@ -101,25 +101,25 @@ class graph
             int src = map[values[0]];
             int dst = map[values[1]];
             Dictionary<int, int> level = dos(src, dst);
-            //Console.WriteLine(src + "/" + dst);
-            //Console.WriteLine("dos = " + level[dst]);
             rs(src, dst, level);
-            Tuple<int, int> strength = new Tuple<int, int>(src, dst);
-            //Console.WriteLine("rs = " + weight[strength]);
+            Tuple<int, int> strength = new Tuple<int, int>(Math.Min(src,dst), Math.Max(src, dst));
+           
             string[] sol2 = sol[1+5*i].Trim().Split();
 
-            // Console.WriteLine("solution is");
+           
             int x = Int32.Parse(sol2[2].Substring(0, sol2[2].Length - 1));
             int y = Int32.Parse(sol2[5].Substring(0, sol2[5].Length));
-           //Console.WriteLine("Answer is: " + x + " " + y);
+           
             if (x == level[dst] && y == weight[strength]){
                 Console.WriteLine("Case: " + i + " Accepted");
             }
             else {
                 Console.WriteLine("Wrong Answer Case: " + i);
+                break;
             }
             
         }
+        Console.WriteLine(" \n \n Finished");
     }
      public static Dictionary<int,int> dos(int src, int dist)
     {
@@ -202,9 +202,9 @@ class graph
                     if ( level.ContainsKey(adj[v].ElementAt(i))) {
                         if ( level[adj[v].ElementAt(i)]> level[v])
                         {
-                            e1 = new Tuple<int, int>(source, adj[v].ElementAt(i));
-                            e2 = new Tuple<int, int>(source, v);
-                            e3 = new Tuple<int, int>(v, adj[v].ElementAt(i));
+                            e1 = new Tuple<int, int>(Math.Min(source, adj[v].ElementAt(i)), Math.Max(source, adj[v].ElementAt(i)));
+                            e2 = new Tuple<int, int>(Math.Min(source,v), Math.Max(source, v));
+                            e3 = new Tuple<int, int>(Math.Min(v, adj[v].ElementAt(i)), Math.Max(v,adj[v].ElementAt(i)));
                             calc_path(e1, e2, e3);
                         }
                     }
@@ -230,6 +230,7 @@ class graph
     public static void calc_path(Tuple<int,int> t1, Tuple<int, int> t2, Tuple<int, int> t3)
     {
         int w;
+
       if (!weight.ContainsKey(t1)) { weight.Add(t1, 0); }
         w=  weight[t2] + weight[t3];
         if (w > weight[t1])

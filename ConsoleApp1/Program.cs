@@ -3,234 +3,274 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections;
 using System.IO;
-
-
-class graph
+using System.Data;
+namespace graph
 {
-    public static Dictionary<Tuple<string,string>, int> weight = new Dictionary<Tuple<string, string>, int>();
-    public static Dictionary<string, HashSet<string>> adj = new Dictionary<string, HashSet<string>>();
+    class Program
+    {
+        public static List<movies_data> movies = new List<movies_data>();
+        public static HashSet<string> actors = new HashSet<string>();
+        public static Dictionary<string, int> actors_id = new Dictionary<string, int>();
+        public static Dictionary<int, string> actors_name = new Dictionary<int, string>();
+        public static Dictionary<int, HashSet<int>> adj = new Dictionary<int, HashSet<int>>();
+        public static Dictionary<Tuple<int, int>, int> weight = new Dictionary<Tuple<int, int>, int>();
+       // public static HashSet<int>[] adj;
 
-   // public static Dictionary<edge, string> relation_strength = new Dictionary<edge, string>();
-  //  public static List<int> strength;
-   // public static Tuple<string, string> edges;
-    static public void Main(String[] args)
-    {
-        read();
-    }
-    static void read()
-    {
-        string text = File.ReadAllText(@"Movies193.txt");
-        string[] movies = text.Split('\n');
-        string[][] actors = new string[movies.Length][];
-        
-      //  edge e;
-        Tuple<string, string> tuple;
-        Tuple<string, String> inverse;
-        for (int i = 0; i < movies.Length; i++)
+        static void Main(string[] args)
         {
-            actors[i] = movies[i].Split('/');
-            
+            read();
+            read_queries();
         }
-        for (int i = 0; i < movies.Length; i++)
+        public class movies_data
         {
-            int length = actors[i].Length;
-            for (int j = 1; j < length; j++)
+            public string movie_name;
+            public List<string> movie_actors;
+            public movies_data()
             {
-                if (!adj.ContainsKey(actors[i][j]))
+                movie_actors = new List<string>();
+            }
+        }
+
+        public static void read()
+        {
+            FileStream fileStream = new FileStream("movies14129.txt", FileMode.Open, FileAccess.Read);
+            StreamReader sr = new StreamReader(fileStream);
+            string line = null;
+            while (sr.Peek() > -1)
+            {
+
+                movies_data movie = new movies_data();
+                line = sr.ReadLine();
+                string[] parts = line.Trim().Split('/');
+                movie.movie_name = parts[0];
+                for (int i = 1; i < parts.Length; i++)
                 {
-                    adj.Add(actors[i][j], new HashSet<string>());
+                    movie.movie_actors.Add(parts[i]);
+                    actors.Add(parts[i]);
                 }
-                for (int k = 1; k < length; k++)
+
+                movies.Add(movie);
+            }
+
+            sr.Close();
+            //Uncomment To test whether it is reading the file correctly
+
+            /*  foreach (string actor in actors) { Console.WriteLine(actor); }
+              foreach(movies_data movie in movies) { Console.WriteLine(movie.movie_name); }*/
+
+            // convert string vetices to integers *hashing*
+            for (int i = 0; i < actors.Count; i++)
+            {
+                actors_id.Add(actors.ElementAt(i), i);
+                actors_name.Add(i, actors.ElementAt(i));
+
+
+            }
+            foreach (movies_data m in movies)
+            {
+                for (int i = 0; i < m.movie_actors.Count; i++)
                 {
-                    if (k != j)
+                    int temp = actors_id[m.movie_actors[i]];
+                    if (!adj.ContainsKey(temp)) { adj.Add(temp, new HashSet<int>()); }
+                    
+                    for (int j = 0; j < m.movie_actors.Count; j++)
                     {
-                        adj[actors[i][j]].Add(actors[i][k]);
+                        
+                        int temp2 = actors_id[m.movie_actors[j]];
+                        if (m.movie_actors[j] != m.movie_actors[i])
+                        {
+                            adj[temp].Add(temp2);
+                        }
+
+
+
+                    }
+
+                }
+                for (int i = 0; i < m.movie_actors.Count; i++)
+                {
+                    for (int j = i + 1; j < m.movie_actors.Count; j++)
+                    {
+                        int temp = actors_id[m.movie_actors[i]];
+                        int temp2 = actors_id[m.movie_actors[j]];
+                        Tuple<int, int> tuple = new Tuple<int, int>(temp, temp2);
+                        Tuple<int, int> inverse = new Tuple<int, int>(temp2, temp);
+
+                        if (weight.ContainsKey(tuple))
+                        {
+                            weight[tuple]++;
+                        }
+                        else
+                        {
+                            weight.Add(tuple, 1);
+                        }
+                        if (weight.ContainsKey(inverse))
+                        {
+                            weight[inverse]++;
+                        }
+                        else
+                        {
+                            weight.Add(inverse, 1);
+                        }
+
                     }
                 }
             }
-            for (int j = 1; j < length; j++)
+            // Uncomment to test whether it's calculate the weights correctly
+            /* foreach (Tuple<int, int> e2 in weight.Keys)
+             {
+                 Tuple<string, string> e1 = new Tuple<string, string>(actors_name[e2.Item1],actors_name[e2.Item2]);
+
+                 Console.WriteLine(e1 + "/" + weight[e2]);
+             }*/
+
+
+        }
+        public static void read_queries()
+        {
+            FileStream fs = new FileStream("queries1.txt", FileMode.Open, FileAccess.Read);
+            StreamReader sr = new StreamReader(fs);
+            string line = null;
+            while (sr.Peek() > -1)
             {
-                for (int k = j + 1; k < length; k++)
+                line = sr.ReadLine();
+                string[] parts = line.Trim().Split('/');
+                int source = actors_id[parts[0]];
+                int destination = actors_id[parts[1]];
+                Dictionary<int, int> levels = dos(source, destination);
+                Console.WriteLine(actors_name[source] + "/" + actors_name[destination]);
+                Console.WriteLine("dos = " + levels[destination]);
+                rs(source, destination, levels);
+                Tuple<int, int> strength = new Tuple<int, int>(destination, source);
+                Console.WriteLine("rs = " + weight[strength]);
+
+            }
+
+        }
+        public static Dictionary<int, int> dos(int src, int dist)
+        {
+            HashSet<int> visited = new HashSet<int>();
+            Queue<int> q = new Queue<int>();
+            Dictionary<int, int> level = new Dictionary<int, int>();
+            q.Enqueue(src);
+            visited.Add(src);
+            level[src] = 0;
+            while (q.Count != 0)
+            {
+                if (!visited.Contains(dist))
                 {
-                   tuple=new Tuple<string, string>(actors[i][j], actors[i][k]);
-                   inverse=new Tuple<string, string>(actors[i][k], actors[i][j]);                 
-                    if (weight.ContainsKey(tuple))
+                    int v = q.Dequeue();
+                    for (int i = 0; i < adj[v].Count; i++)
                     {
-                        weight[tuple]++;
-                    }
-                    else
-                    {
-                        weight.Add(tuple, 1);
-                    }
-                    if (weight.ContainsKey(inverse))
-                    {
-                        weight[inverse]++;
-                    }
-                    else
-                    {
-                        weight.Add(inverse, 1);
+                        if (!visited.Contains(adj[v].ElementAt(i)))
+                        {
+
+                            q.Enqueue(adj[v].ElementAt(i));
+                            level.Add(adj[v].ElementAt(i), level[v] + 1);
+                            visited.Add(adj[v].ElementAt(i));
+
+
+                        }
                     }
                 }
+                else return level;
             }
-        }
-     /*   foreach (Tuple<string,string> e2 in weight.Keys)
-         {
-              Console.WriteLine(e2+"/"+weight[e2]);
-         }*/
-     string text2 = File.ReadAllText(@"queries110.txt");
-        string[] queries = text2.Split('\n');
-
-        for (int i = 0; i < queries.Length; i++)
-        {
-            string[] values = queries[i].Trim().Split('/');
-            string src = values[0];
-            string dst = values[1];
-            Dictionary<string,int> level = dos(src, dst);
-            Console.WriteLine(src + "/" + dst);
-            Console.WriteLine("dos = " + level[dst]);
-            if (src == "Hall, Douglas Kent")
-                _ = 1;
-            rs(src, dst, level);
-            Tuple<string,string> strength = new Tuple<string,string>(src, dst);
-            Console.WriteLine("rs = " + weight[strength]);
+            visited.Clear();
+            return level;
 
 
         }
-    }
-     public static Dictionary<string,int> dos(string src, string dist)
-    {
-        HashSet<string> visited = new HashSet<string>();
-        Queue<string> q = new Queue<string>();
-        Dictionary<string, int> level = new Dictionary<string, int>();
-        q.Enqueue(src);
-        visited.Add(src);
-        level[src] = 0;
-        
-       
-
-
-        while (q.Count != 0)
+        static void rs(int source, int destination, Dictionary<int, int> level)
         {
-            if (!visited.Contains(dist))
+            // Dictionary<int, List<string>> layers = new Dictionary<int, List<string>>();
+
+            HashSet<int> visited = new HashSet<int>();
+           // HashSet<int> layers = new HashSet<int>();
+            // weight from source to dist "weight[e1]" = weight from source to parent "weight [e2]" + weight from parent to dist "weight [e3]"
+            Tuple<int, int> e1;
+            Tuple<int, int> e2;
+            Tuple<int, int> e3;
+
+            // layers[0].Add(source);
+            Queue<int> q = new Queue<int>();
+            q.Enqueue(destination);
+           // layers.Add(level[source]);
+            visited.Add(destination);
+            while (q.Count != 0)
             {
-                string v = q.Dequeue();
+                int v = q.Dequeue();
+
+
                 for (int i = 0; i < adj[v].Count; i++)
                 {
-                    if (!visited.Contains(adj[v].ElementAt(i)))
+                    if (level.ContainsKey(adj[v].ElementAt(i)) &&level[adj[v].ElementAt(i)] < level[v])
                     {
 
-                        q.Enqueue(adj[v].ElementAt(i));
-                        level.Add(adj[v].ElementAt(i), level[v] + 1);
-                        visited.Add(adj[v].ElementAt(i));
-                       
-                       
-                    }
-                }
-            }
-            else return level;
-        }
-        visited.Clear();
-        return level;
-    }
-    static void rs(string source, string destination,Dictionary<string,int> level)
-    {
-        // Dictionary<int, List<string>> layers = new Dictionary<int, List<string>>();
-        if (source == "Steele, Tom" && destination == "Clemenson, Christian")
-            _ = 1;
-        if (source == "Hall, Douglas Kent" && destination == "Baldwin, Daniel")
-            _ = 1;
-        HashSet<string> visited = new HashSet<string>();
-        HashSet<int> layers = new HashSet<int>();
-        // weight from source to dist "weight[e1]" = weight from source to parent "weight [e2]" + weight from parent to dist "weight [e3]"
-        Tuple<string, string> e1;
-        Tuple<string, string> e2;
-        Tuple<string, string> e3;
-
-       // layers[0].Add(source);
-        Queue<string> q = new Queue<string>();
-        q.Enqueue(source);
-        layers.Add(level[source]);
-        visited.Add(source);
-        while (q.Count != 0)
-        {
-            string v = q.Dequeue();
-
-
-            for(int i = 0; i < adj[v].Count; i++)
-            {
-                
-                if (!visited.Contains(adj[v].ElementAt(i)))
-                {
-                    //if (!layers.Contains(level[destination]))
-                    //{
-
-                        if (level.ContainsKey(adj[v].ElementAt(i)) &&level[adj[v].ElementAt(i)] != level[destination])
+                        if (!visited.Contains(adj[v].ElementAt(i)))
                         {
+                         //if (!layers.Contains(level[destination]))
+                         //{
+
+                       
+
                             q.Enqueue(adj[v].ElementAt(i));
                             visited.Add(adj[v].ElementAt(i));
-                           // layers.Add(level[adj[v].ElementAt(i)]);
+                            // layers.Add(level[adj[v].ElementAt(i)]);
 
                         }
-                        
 
 
-                       
-                       
-                    //}
-                   
-                }
-                // for update weight of[src,dst]
-                if (v != source && adj[v].ElementAt(i)!= source)
-                {
-                    if ( level.ContainsKey(adj[v].ElementAt(i))) {
-                        if ( level[adj[v].ElementAt(i)]> level[v])
+
+
+
+
+                        if (v != destination )
                         {
-                            e1 = new Tuple<string, string>(source, adj[v].ElementAt(i));
-                            e2 = new Tuple<string, string>(source, v);
-                            e3 = new Tuple<string, string>(v, adj[v].ElementAt(i));
-                            calc_path(e1, e2, e3);
-                        }
+                            
+                            
+                               
+                                    e1 = new Tuple<int, int>(destination, adj[v].ElementAt(i));
+                                    e2 = new Tuple<int, int>(destination, v);
+                                    e3 = new Tuple<int, int>(v, adj[v].ElementAt(i));
+                                    calc_path(e1, e2, e3);
+                                
+                        } //}
+
                     }
-                       
+                    // for update weight of[src,dst]
                    
 
-                    
+
+
+
                 }
-
-
-
-
             }
+
+
+
+
+
+
         }
-
-        
-
-      //  Tuple<string, string> e=new Tuple<string, string>(source, destination);
-        //Console.WriteLine("rs =" + weight[e]);
-
-       
-    }
-    public static void calc_path(Tuple<string,string> t1, Tuple<string, string> t2, Tuple<string, string> t3)
-    {
-        int w;
-      if (!weight.ContainsKey(t1)) { weight.Add(t1, 0); }
-        w=  weight[t2] + weight[t3];
-        if (w > weight[t1])
+        public static void calc_path(Tuple<int, int> t1, Tuple<int, int> t2, Tuple<int, int> t3)
         {
-            if (t1.Item1 == "Hall, Douglas Kent")
-                _ = 1;
-            weight[t1] = w;
+            int w;
+            if (!weight.ContainsKey(t1)) { weight.Add(t1, 0); }
+            w = weight[t2] + weight[t3];
+            if (w > weight[t1])
+            {
+
+                weight[t1] = w;
+            }
+
+
+
+
         }
 
 
 
-       
     }
-}
-struct edge
-{
-    public string v1;
-    public string v2;
+
 }

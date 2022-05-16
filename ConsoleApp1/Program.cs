@@ -22,7 +22,7 @@ class graph
     }
     static void read()
     {
-        string text = File.ReadAllText(@"Movies14129.txt");
+        string text = File.ReadAllText(@"Movies122806.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         Tuple<int, int> tuple;
@@ -81,15 +81,15 @@ class graph
                 }
             }
         }
- 
 
 
 
-        string text2 = File.ReadAllText(@"queries26.txt");
+
+        string text2 = File.ReadAllText(@"queries22.txt");
         string[] queries = text2.Split('\n');
-        text2 = File.ReadAllText(@"queries26 - Solution.txt");
+        text2 = File.ReadAllText(@"queries22 - Solution.txt");
         string[] sol = text2.Split('\n');
-        level = new int[(map.Count+1)];
+        level = new int[(map.Count + 1)];
         rsw = new int[map.Count + 1];
         for (int i = 0; i < queries.Length - 1; i++)
         {
@@ -100,21 +100,21 @@ class graph
             //src = 11862;
             //dst = 552;
             bfs(src, dst);
-
+            rs(src, dst);
             string[] sol2 = sol[1 + 5 * i].Trim().Split();
             int x = Int32.Parse(sol2[2].Substring(0, sol2[2].Length - 1));
             int y = Int32.Parse(sol2[5].Substring(0, sol2[5].Length));
-            
-            if (x == (level[dst]-1) && y == rsw[dst])
+
+            if (x == (level[dst] - 1) && y == rsw[dst])
             {
                 Console.WriteLine("Case: " + i + " Accepted");
-                /*Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
-                Console.WriteLine("outpu: " + x + " " + y);*/
+                Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
+                Console.WriteLine("outpu: " + x + " " + y);
             }
             else
             {
                 Console.WriteLine(src + " " + dst);
-                Console.WriteLine("output: " + (level[dst]-1) + " " + rsw[dst]);
+                Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
                 Console.WriteLine("outpu: " + x + " " + y);
                 Console.WriteLine("Wrong Answer Case: " + i);
                 //break;
@@ -129,9 +129,9 @@ class graph
         bool[] visited = new bool[level.Length];
         Queue<int> q = new Queue<int>();
         level = new int[level.Length];
-        rsw = new int[level.Length];
+        //rsw = new int[level.Length];
         level[source] = 1;
-        
+
         visited[source] = true;
         q.Enqueue(source);
         while (q.Count != 0)
@@ -143,30 +143,34 @@ class graph
             }
             for (int i = 0; i < adj[v].Count; i++)
             {
-                
+
                 int index = adj[v].ElementAt(i);
                 //Console.WriteLine(v + " " + index);
 
                 int x;
-                if (v > index){ x = rsw[v] + we[new Tuple<int, int>(index,v)]; }
-                else {x = rsw[v] + we[new Tuple<int, int>(v,index)];}
+                /*if (v > index) { x = rsw[v] + we[new Tuple<int, int>(index, v)]; }
+                else { x = rsw[v] + we[new Tuple<int, int>(v, index)]; }*/
                 if (!visited[index] && level[dest] == 0)
                 {
                     level[index] = level[v] + 1;
                     visited[index] = true;
                     q.Enqueue(index);
                 }
-                if (rsw[index] < x && level[v] == level[index] - 1)
+               /* if (rsw[index] < x && level[v] == level[index] - 1)
                 {
                     rsw[index] = x;
                 }
-                
+*/
             }
-            
+
         }
-        
+
     }
+    static void rs(int source, int dest) {
+        
+    } 
 }
+
 struct edge
 {
     public int v1;

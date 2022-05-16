@@ -12,8 +12,9 @@ class graph
     public static Dictionary<Tuple<int, int>, int> we = new Dictionary<Tuple<int, int>, int>(); //to minize memory by half, we order pairs value before add or get
     public static List<HashSet<int>> adj = new List<HashSet<int>>();         //vertex will be converted to int
     public static Dictionary<string, int> map = new Dictionary<string, int>();
-    public static Dictionary<int, string> revMap = new Dictionary<int, string>();// we don't need it
+    public static Dictionary<int, string> revMap = new Dictionary<int, string>();// we can use it as an array not dictionary
     public static int[] level;
+    public static List<List<int>> lvl;
     public static int[] rsw;
     static public void Main(String[] args)
     {
@@ -97,27 +98,27 @@ class graph
             string[] values = queries[i].Trim().Split('/');
             int src = map[values[0]];
             int dst = map[values[1]];
-            //src = 11862;
-            //dst = 552;
+            rsw = new int[level.Length];
             bfs(src, dst);
+            
             rs(src, dst);
             string[] sol2 = sol[1 + 5 * i].Trim().Split();
             int x = Int32.Parse(sol2[2].Substring(0, sol2[2].Length - 1));
             int y = Int32.Parse(sol2[5].Substring(0, sol2[5].Length));
 
-            if (x == (level[dst] - 1) && y == rsw[dst])
+            if (x == (level[dst] - 1) && y == rsw[src])
             {
                 Console.WriteLine("Case: " + i + " Accepted");
-                Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
-                Console.WriteLine("outpu: " + x + " " + y);
             }
             else
             {
-                Console.WriteLine(src + " " + dst);
+                Console.WriteLine("soruce: "+src + " dest " + dst);
                 Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
+                Console.WriteLine("output: source " + (level[src] - 1) + " " + rsw[src]);
+
                 Console.WriteLine("outpu: " + x + " " + y);
                 Console.WriteLine("Wrong Answer Case: " + i);
-                //break;
+                break;
             }
 
         }
@@ -125,13 +126,15 @@ class graph
     }
     static void bfs(int source, int dest)
     {
-        //Console.WriteLine(); Console.WriteLine(); Console.WriteLine(); Console.WriteLine(); Console.WriteLine();
         bool[] visited = new bool[level.Length];
         Queue<int> q = new Queue<int>();
         level = new int[level.Length];
-        //rsw = new int[level.Length];
+        lvl = new List<List<int>>();
+        lvl.Add(new List<int>());
+        lvl[0].Add(source);
+        //created after doing the bfs or while doing it
+        
         level[source] = 1;
-
         visited[source] = true;
         q.Enqueue(source);
         while (q.Count != 0)
@@ -145,29 +148,58 @@ class graph
             {
 
                 int index = adj[v].ElementAt(i);
-                //Console.WriteLine(v + " " + index);
 
-                int x;
-                /*if (v > index) { x = rsw[v] + we[new Tuple<int, int>(index, v)]; }
+                /*int x;
+                if (v > index) { x = rsw[v] + we[new Tuple<int, int>(index, v)]; }
                 else { x = rsw[v] + we[new Tuple<int, int>(v, index)]; }*/
                 if (!visited[index] && level[dest] == 0)
                 {
+                    if (lvl.Count < level[v] + 1) { lvl.Add(new List<int>()); }
+                    lvl[level[v]].Add(index);
                     level[index] = level[v] + 1;
                     visited[index] = true;
                     q.Enqueue(index);
                 }
-               /* if (rsw[index] < x && level[v] == level[index] - 1)
+
+                /*if (rsw[index] < x && level[v] == level[index] - 1)
                 {
                     rsw[index] = x;
-                }
-*/
+                }*/
+                    
             }
 
         }
 
     }
     static void rs(int source, int dest) {
-        
+        Queue<int> q =  new Queue<int>();
+        List<int> visited = new List<int> ();
+        q.Enqueue(dest);
+        while (q.Count != 0) {
+            int v = q.Dequeue();
+            if (v == source) { break; }
+            for (int i = 0; i < adj[v].Count; i++)
+            {
+                int index = adj[v].ElementAt(i);
+
+                if (lvl[level[v]-2].Contains(index)){
+
+                    if (!visited.Contains(index) &&!q.Contains(index)) {
+                        q.Enqueue(index);
+                        visited.Add(index);
+                    }
+
+                    int x;
+                    if (v > index) { x = rsw[v] + we[new Tuple<int, int>(index, v)]; }
+                    else { x = rsw[v] + we[new Tuple<int, int>(v, index)]; }
+                    if (rsw[index] < x )
+                    {
+                        rsw[index] = x;
+                       // Console.WriteLine(index + " " + x);
+                    }
+                }
+            }
+        }
     } 
 }
 

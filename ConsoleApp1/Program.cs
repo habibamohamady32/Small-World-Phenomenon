@@ -100,7 +100,7 @@ class graph
             int dst = map[values[1]];
             rsw = new int[level.Length];
             bfs(src, dst);
-            
+
             rs(src, dst);
             string[] sol2 = sol[1 + 5 * i].Trim().Split();
             int x = Int32.Parse(sol2[2].Substring(0, sol2[2].Length - 1));
@@ -112,13 +112,12 @@ class graph
             }
             else
             {
-                Console.WriteLine("soruce: "+src + " dest " + dst);
+                Console.WriteLine("soruce: " + src + " dest " + dst);
                 Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
                 Console.WriteLine("output: source " + (level[src] - 1) + " " + rsw[src]);
 
                 Console.WriteLine("outpu: " + x + " " + y);
                 Console.WriteLine("Wrong Answer Case: " + i);
-                break;
             }
 
         }
@@ -133,7 +132,7 @@ class graph
         lvl.Add(new List<int>());
         lvl[0].Add(source);
         //created after doing the bfs or while doing it
-        
+
         level[source] = 1;
         visited[source] = true;
         q.Enqueue(source);
@@ -165,21 +164,48 @@ class graph
                 {
                     rsw[index] = x;
                 }*/
-                    
+
             }
 
         }
 
     }
-    static void rs(int source, int dest) {
-        Queue<int> q =  new Queue<int>();
-        List<int> visited = new List<int> ();
+    static void rs(int source, int dest)
+    {
+        Queue<int> q = new Queue<int>();
+        List<int> visited = new List<int>();
         q.Enqueue(dest);
-        while (q.Count != 0) {
+        while (q.Count != 0)
+        {
             int v = q.Dequeue();
             if (v == source) { break; }
-            for (int i = 0; i < adj[v].Count; i++)
+            Console.WriteLine(lvl[v].Count + " ");
+            for (int i = 0; i < lvl[level[v] - 2].Count; i++)
             {
+                int u = (lvl[level[v] - 2][i]);
+                if (adj[v].Contains(u))
+                {
+
+                    if (!visited.Contains(u) && !q.Contains(u))
+                    {
+                        q.Enqueue(u);
+                        visited.Add(u);
+                    }
+                    int x;
+                    if (v > u) { x = rsw[v] + we[new Tuple<int, int>(u, v)]; }
+                    else { x = rsw[v] + we[new Tuple<int, int>(v, u)]; }
+                    if (rsw[u] < x)
+                    {
+                        rsw[u] = x;
+                    }
+                }
+
+
+
+
+
+
+                /*
                 int index = adj[v].ElementAt(i);
 
                 if (lvl[level[v]-2].Contains(index)){
@@ -198,9 +224,10 @@ class graph
                        // Console.WriteLine(index + " " + x);
                     }
                 }
+            */
             }
         }
-    } 
+    }
 }
 
 struct edge

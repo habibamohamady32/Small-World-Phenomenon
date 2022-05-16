@@ -13,7 +13,6 @@ class graph
     public static List<HashSet<int>> adj = new List<HashSet<int>>();         //vertex will be converted to int
     public static Dictionary<string, int> map = new Dictionary<string, int>();
     public static Dictionary<int, string> revMap = new Dictionary<int, string>();// we don't need it
-    public static Dictionary<string, Vector<int>> mov = new Dictionary<string, Vector<int>>();
     public static int[] level;
     public static int[] rsw;
     static public void Main(String[] args)
@@ -34,7 +33,6 @@ class graph
         }
         for (int i = 0; i < movies.Length; i++)
         {
-            mov.Add(actors[i][0],new Vector<int>());
             int length = actors[i].Length;
             for (int j = 1; j < length; j++)
             {
@@ -87,9 +85,9 @@ class graph
 
 
 
-        string text2 = File.ReadAllText(@"queries600.txt");
+        string text2 = File.ReadAllText(@"queries26.txt");
         string[] queries = text2.Split('\n');
-        text2 = File.ReadAllText(@"queries600 - Solution.txt");
+        text2 = File.ReadAllText(@"queries26 - Solution.txt");
         string[] sol = text2.Split('\n');
         level = new int[(map.Count+1)];
         rsw = new int[map.Count + 1];
@@ -101,15 +99,17 @@ class graph
             int dst = map[values[1]];
             //src = 11862;
             //dst = 552;
-            rs(dst, src);
+            bfs(src, dst);
 
             string[] sol2 = sol[1 + 5 * i].Trim().Split();
             int x = Int32.Parse(sol2[2].Substring(0, sol2[2].Length - 1));
             int y = Int32.Parse(sol2[5].Substring(0, sol2[5].Length));
             
-            if (x == (level[src]-1) && y == rsw[src])
+            if (x == (level[dst]-1) && y == rsw[dst])
             {
                 Console.WriteLine("Case: " + i + " Accepted");
+                /*Console.WriteLine("output: " + (level[dst] - 1) + " " + rsw[dst]);
+                Console.WriteLine("outpu: " + x + " " + y);*/
             }
             else
             {
@@ -117,35 +117,40 @@ class graph
                 Console.WriteLine("output: " + (level[dst]-1) + " " + rsw[dst]);
                 Console.WriteLine("outpu: " + x + " " + y);
                 Console.WriteLine("Wrong Answer Case: " + i);
-                break;
+                //break;
             }
 
         }
         Console.WriteLine(" \n \n Finished");
     }
-    static void rs(int source, int dest)
+    static void bfs(int source, int dest)
     {
-        Queue<int> q = new Queue<int>();
-        rsw = new int[level.Length];
+        //Console.WriteLine(); Console.WriteLine(); Console.WriteLine(); Console.WriteLine(); Console.WriteLine();
         bool[] visited = new bool[level.Length];
+        Queue<int> q = new Queue<int>();
         level = new int[level.Length];
+        rsw = new int[level.Length];
         level[source] = 1;
         
         visited[source] = true;
         q.Enqueue(source);
-
         while (q.Count != 0)
         {
             int v = q.Dequeue();
+            if (level[v] >= level[dest] && level[dest] != 0)
+            {
+                break;
+            }
             for (int i = 0; i < adj[v].Count; i++)
             {
+                
                 int index = adj[v].ElementAt(i);
                 //Console.WriteLine(v + " " + index);
 
                 int x;
                 if (v > index){ x = rsw[v] + we[new Tuple<int, int>(index,v)]; }
                 else {x = rsw[v] + we[new Tuple<int, int>(v,index)];}
-                if (!visited[index])
+                if (!visited[index] && level[dest] == 0)
                 {
                     level[index] = level[v] + 1;
                     visited[index] = true;
@@ -157,9 +162,7 @@ class graph
                 }
                 
             }
-            if (level[v] > level[dest] && level[dest] != 0) {
-                break;
-            }
+            
         }
         
     }

@@ -5,14 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
 using System.IO;
-
+using System.Numerics;
 
 class graph
 {
     public static Dictionary<Tuple<int, int>, int> we = new Dictionary<Tuple<int, int>, int>(); //to minize memory by half, we order pairs value before add or get
-    public static Dictionary<int, HashSet<int>> adj = new Dictionary<int, HashSet<int>>();         //vertex will be converted to int
+    public static List<HashSet<int>> adj = new List<HashSet<int>>();         //vertex will be converted to int
     public static Dictionary<string, int> map = new Dictionary<string, int>();
-    public static Dictionary<int, string> revMap = new Dictionary<int, string>();
+    public static Dictionary<int, string> revMap = new Dictionary<int, string>();// we don't need it
+    public static Dictionary<string, Vector<int>> mov = new Dictionary<string, Vector<int>>();
     public static int[] level;
     public static int[] rsw;
     static public void Main(String[] args)
@@ -22,7 +23,7 @@ class graph
     }
     static void read()
     {
-        string text = File.ReadAllText(@"Movies967.txt");
+        string text = File.ReadAllText(@"Movies14129.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         Tuple<int, int> tuple;
@@ -33,29 +34,33 @@ class graph
         }
         for (int i = 0; i < movies.Length; i++)
         {
+            mov.Add(actors[i][0],new Vector<int>());
             int length = actors[i].Length;
             for (int j = 1; j < length; j++)
             {
                 if (!map.ContainsKey(actors[i][j]))
                 {
-                    map.Add(actors[i][j], map.Count + 1);
+                    adj.Add(new HashSet<int>());
+                    map.Add(actors[i][j], map.Count);
                     revMap.Add(revMap.Count, actors[i][j]);
+
+
                 }
                 for (int k = 1; k < length; k++)
                 {
                     //Console.Write("  " + j);
-                    if (!adj.ContainsKey(map[actors[i][j]]))
-                    {
-                        adj.Add(map[actors[i][j]], new HashSet<int>());
-                    }
+
                     if (!map.ContainsKey(actors[i][k]))
                     {
-                        map.Add(actors[i][k], map.Count + 1);
+                        adj.Add(new HashSet<int>());
+                        map.Add(actors[i][k], map.Count);
                         revMap.Add(revMap.Count, actors[i][k]);
+
                     }
                     if (k != j)
                     {
-                        adj[map[actors[i][j]]].Add(map[actors[i][k]]);
+                        //Console.WriteLine(map[actors[i][j]]);
+                        adj[(map[actors[i][j]])].Add(map[actors[i][k]]);
                     }
                 }
             }
@@ -82,9 +87,9 @@ class graph
 
 
 
-        string text2 = File.ReadAllText(@"queries4000.txt");
+        string text2 = File.ReadAllText(@"queries600.txt");
         string[] queries = text2.Split('\n');
-        text2 = File.ReadAllText(@"queries4000 - Solution.txt");
+        text2 = File.ReadAllText(@"queries600 - Solution.txt");
         string[] sol = text2.Split('\n');
         level = new int[(map.Count+1)];
         rsw = new int[map.Count + 1];

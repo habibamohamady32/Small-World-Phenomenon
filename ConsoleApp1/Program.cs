@@ -120,45 +120,46 @@ class graph
             int[] level = new int[map.Count];
             level = dos(src, dst);
             Console.WriteLine(revMap[src] + "/" + revMap[dst]);
-            Console.WriteLine("dos = " + level[dst]);
+            Console.WriteLine("dos = " + (level[dst]-1));
 
             rs(src, dst, level);
         }
     }
     public static int[] dos(int src, int dist)
     {
-        HashSet<int> visited = new HashSet<int>();
+       // HashSet<int> visited = new HashSet<int>();
         Queue<int> q = new Queue<int>();
         int[] level = new int[map.Count];
         q.Enqueue(src);
-        visited.Add(src);
-        level[src] = 0;
+       // visited.Add(src);
+        level[src] = 1;
 
         while (q.Count != 0)
         {
-            if (!visited.Contains(dist))
+            if (level[dist]==0)
             {
                 int v = q.Dequeue();
                 for (int i = 0; i < adj[v].Count; i++)
                 {
-                    if (!visited.Contains(adj[v].ElementAt(i)))
+                    if (level[adj[v].ElementAt(i)]==0)
                     {
                         q.Enqueue(adj[v].ElementAt(i));
                         level[adj[v].ElementAt(i)] = level[v] + 1;
-                        visited.Add(adj[v].ElementAt(i));
+                      //  visited.Add(adj[v].ElementAt(i));
                     }
                 }
             }
             else return level;
         }
-        visited.Clear();
+       // visited.Clear();
         return level;
     }
     static void rs(int source, int destination, int[] level)
     {
-        if (revMap[source] == "E" && revMap[destination] == "K")
+        if (revMap[source] == "C" && revMap[destination] == "E")
             _ = -1;
         HashSet<int> visited = new HashSet<int>();
+        
         //HashSet<int> layers = new HashSet<int>();
         // weight from source to dist "weight[e1]" = weight from source to parent "weight [e2]" + weight from parent to dist "weight [e3]"
         Tuple<int, int> e1;
@@ -182,7 +183,7 @@ class graph
                 //if (!layers.Contains(level[destination]))
                 //{
 
-                if (level[adj[v].ElementAt(i)] < level[v])
+                if (level[adj[v].ElementAt(i)]!=0 && level[adj[v].ElementAt(i)] < level[v])
                 {
                     if (level[adj[v].ElementAt(i)] != level[source])
                     {
@@ -280,39 +281,6 @@ class graph
 
             weight[t1] = w;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     }
 }

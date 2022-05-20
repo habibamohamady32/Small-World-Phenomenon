@@ -26,7 +26,20 @@ class graph
     }
     static void read()
     {
-        string text = File.ReadAllText(@"Movies14129.txt");
+        //sample
+        //string text = File.ReadAllText(@"movies1.txt");
+        //small case1
+        //string text = File.ReadAllText(@"Movies193.txt");
+        //small case2
+        //string text = File.ReadAllText(@"Movies187.txt");
+        //medium case1
+        //string text = File.ReadAllText(@"Movies967.txt");
+        //medium case2
+        //string text = File.ReadAllText(@"Movies4736.txt");
+        //large
+        //string text = File.ReadAllText(@"Movies14129.txt");
+        //Extreme
+        string text = File.ReadAllText(@"Movies122806.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         Tuple<int, int> tuple;
@@ -40,13 +53,6 @@ class graph
             int length = actors[i].Length;
             for (int j = 1; j < length; j++)
             {
-                /*  if (!actor_to_movie.ContainsKey(actors[i][j]))
-                  {
-                      actor_to_movie.Add(actors[i][j], new List<string>());
-                      actor_to_movie[actors[i][j]].Add(actors[i][0]);
-                  }
-                  else { actor_to_movie[actors[i][j]].Add(actors[i][0]); }*/
-
                 if (!map.ContainsKey(actors[i][j]))
                 {
                     map.Add(actors[i][j], map.Count);
@@ -55,7 +61,6 @@ class graph
                 }
                 for (int k = 1; k < length; k++)
                 {
-
                     if (!map.ContainsKey(actors[i][k]))
                     {
                         adj.Add(new ArrayList());
@@ -67,10 +72,8 @@ class graph
                     {
                         adj[(map[actors[i][j]])].Add(map[actors[i][k]]);
                     }
-
                 }
             }
-
             for (int j = 1; j < length; j++)
             {
                 for (int k = j + 1; k < length; k++)
@@ -90,19 +93,32 @@ class graph
                     if (!actor_to_movie.ContainsKey(tuple))
                     {
                         actor_to_movie.Add(tuple, actors[i][0]);
-
-
                     }
-
-
                 }
             }
         }
-        /*   foreach (Tuple<string,string> e2 in weight.Keys)
-            {
-                 Console.WriteLine(e2+"/"+weight[e2]);
-            }*/
-        string text2 = File.ReadAllText(@"queries26.txt");
+        //sample
+        //string text2 = File.ReadAllText(@"queries1.txt");
+        //small case1
+        //string text2 = File.ReadAllText(@"queries110.txt");
+        //small case2
+        //string text2 = File.ReadAllText(@"queries50.txt");
+        //medium case1 85
+        //string text2 = File.ResadAllText(@"queries85.txt");
+        //medium case1 4000
+        //string text2 = File.ReadAllText(@"queries4000.txt");
+        //medium case2 110
+        //string text2 = File.ReadAllText(@"queries110.txt");
+        //medium case2 2000
+        //string text2 = File.ReadAllText(@"queries2000.txt");
+        //large 26
+        //string text2 = File.ReadAllText(@"queries26.txt");
+        //large 600
+        //string text2 = File.ReadAllText(@"queries600.txt");
+        //Extreme200
+        //string text2 = File.ReadAllText(@"queries200.txt");
+        //Extreme22
+        string text2 = File.ReadAllText(@"queries22.txt");
         string[] queries = text2.Trim().Split('\n');
 
 
@@ -139,7 +155,6 @@ class graph
                     {
                         q.Enqueue(index);
                         level[index] = level[v] + 1;
-
                     }
                 }
             }
@@ -150,8 +165,6 @@ class graph
     }
     static void rs(int source, int destination, int[] level)
     {
-        if (revMap[source] == "C" && revMap[destination] == "E")
-            _ = -1;
         HashSet<int> visited = new HashSet<int>();
 
         Tuple<int, int> e1;
@@ -163,16 +176,12 @@ class graph
         int[] distance = new int[level.Length];
         q.Enqueue(destination);
         visited.Add(destination);
-       
+
         while (q.Count != 0)
         {
             int v = q.Dequeue();
-
-
             for (int i = 0; i < adj[v].Count; i++)
             {
-
-
                 int index = (int)adj[v][i];
 
                 if (level[index] != 0 && level[index] < level[v])
@@ -184,25 +193,14 @@ class graph
                         {
                             q.Enqueue(index);
                             visited.Add(index);
-                            // layers.Add(level[adj[v].ElementAt(i)]);
-
                         }
-
-                       
-
-                        
                     }
-                    // for update weight of[src,dst]
-
                     int min = Math.Min(destination, index);
                     int max = Math.Max(destination, index);
                     e1 = new Tuple<int, int>(min, max);
 
                     if (v != destination)
                     {
-
-
-
                         int min1 = Math.Min(destination, v);
                         int max1 = Math.Max(destination, v);
                         e2 = new Tuple<int, int>(min1, max1);
@@ -217,71 +215,47 @@ class graph
                             distance[index] = w;
                             parent[index] = v;
                         }
-
-
                     }
-                    else { distance[index] = weight[e1];
+                    else
+                    {
+                        distance[index] = weight[e1];
                         parent[index] = v;
                     }
-
-
                 }
-
             }
-            // for update weight of[src,dst]
         }
-        Console.WriteLine("rs = "+ distance[source]);
+        Console.WriteLine("rs = " + distance[source]);
         Console.Write("chain of movies = ");
         Queue<int> m = new Queue<int>();
         Queue<int> a = new Queue<int>();
         m.Enqueue(source);
         a.Enqueue(source);
-        while(m.Count > 0)
+        while (m.Count > 0)
         {
             int d = m.Dequeue();
             int min = Math.Min(d, parent[d]);
             int max = Math.Max(d, parent[d]);
             Tuple<int, int> e = new Tuple<int, int>(min, max);
-            Console.Write( actor_to_movie[e]);
-            if (parent[d] != destination) 
+            Console.Write(actor_to_movie[e]);
+            if (parent[d] != destination)
             {
                 Console.Write("=>");
-                m.Enqueue(parent[d]); 
+                m.Enqueue(parent[d]);
             }
-
         }
         Console.WriteLine();
         Console.Write("chain of actors = ");
         while (a.Count > 0)
         {
             int d = a.Dequeue();
-           
-            Console.Write(revMap[d]+ " -> ");
+
+            Console.Write(revMap[d] + " -> ");
             if (parent[d] != destination)
             {
-                
+
                 a.Enqueue(parent[d]);
             }
-
         }
         Console.WriteLine(revMap[destination]);
-
     }
-
-
-
-    // Console.Write("chain = ");
-    //  Stack<string> stack = new Stack<string>(actor_to_movie[strength].Reverse());
-
-
-
-    /* while (stack.Count != 0)
-     {
-         Console.Write(stack.Pop());
-         if (stack.Count != 0) { Console.Write("=>"); }
-     }
-     Console.WriteLine("\r");*/
-
-
-
 }

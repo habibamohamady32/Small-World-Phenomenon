@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
-
-
 class graph
 {
     public static Dictionary<Tuple<int, int>, int> weight = new Dictionary<Tuple<int, int>, int>();
     public static List<ArrayList> adj = new List<ArrayList>();
-    public static Dictionary<Tuple<int, int>, string> actor_to_movie = new Dictionary<Tuple<int, int>, string>(); // to save one movie for each edge
-    public static Dictionary<string, int> map = new Dictionary<string, int>();// for incoding the vertcies
+    public static Dictionary<Tuple<int, int>, string> actor_to_movie = new Dictionary<Tuple<int, int>, string>();
+    public static Dictionary<string, int> map = new Dictionary<string, int>();
     public static Dictionary<int, string> revMap = new Dictionary<int, string>();
     static public void Main(String[] args)
     {
@@ -24,10 +22,10 @@ class graph
         Console.WriteLine("finished in \r");
         Console.WriteLine(sw.Elapsed.ToString());
     }
-    static void read()
+    static void read()//O(movies*V^2)
     {
         //sample
-        //string text = File.ReadAllText(@"movies1.txt");
+        string text = File.ReadAllText(@"movies1.txt");                                                                 //
         //small case1
         //string text = File.ReadAllText(@"Movies193.txt");
         //small case2
@@ -39,16 +37,16 @@ class graph
         //large
         //string text = File.ReadAllText(@"Movies14129.txt");
         //Extreme
-        string text = File.ReadAllText(@"Movies122806.txt");
+       // string text = File.ReadAllText(@"Movies122806.txt");
         string[] movies = text.Split('\n');
         string[][] actors = new string[movies.Length][];
         Tuple<int, int> tuple;
-        for (int i = 0; i < movies.Length; i++)
+        for (int i = 0; i < movies.Length; i++) //  O(movies*n)
         {
             actors[i] = movies[i].Split('/');
 
         }
-        for (int i = 0; i < movies.Length; i++)
+        for (int i = 0; i < movies.Length; i++)// O(movies*v^2)
         {
             int length = actors[i].Length;
             for (int j = 1; j < length; j++)
@@ -59,7 +57,7 @@ class graph
                     adj.Add(new ArrayList());
                     revMap.Add(revMap.Count, actors[i][j]);
                 }
-                for (int k = 1; k < length; k++)
+                for (int k = 1; k < length; k++)                                                                           //
                 {
                     if (!map.ContainsKey(actors[i][k]))
                     {
@@ -74,6 +72,8 @@ class graph
                     }
                 }
             }
+        
+        
             for (int j = 1; j < length; j++)
             {
                 for (int k = j + 1; k < length; k++)
@@ -98,7 +98,7 @@ class graph
             }
         }
         //sample
-        //string text2 = File.ReadAllText(@"queries1.txt");
+        string text2 = File.ReadAllText(@"queries1.txt");
         //small case1
         //string text2 = File.ReadAllText(@"queries110.txt");
         //small case2
@@ -118,7 +118,7 @@ class graph
         //Extreme200
         //string text2 = File.ReadAllText(@"queries200.txt");
         //Extreme22
-        string text2 = File.ReadAllText(@"queries22.txt");
+       // string text2 = File.ReadAllText(@"queries22.txt");
         string[] queries = text2.Trim().Split('\n');
 
 
@@ -135,15 +135,15 @@ class graph
             rs(src, dst, level);
         }
     }
-    public static int[] dos(int src, int dist)
+    static int[] dos(int src, int dist)// O(V+E)
     {
-        Queue<int> q = new Queue<int>();
-        int[] level = new int[map.Count];
-        q.Enqueue(src);
+        Queue<int> q = new Queue<int>();// O(1)
+        int[] level = new int[map.Count];// θ(v)
+        q.Enqueue(src);// O(1)
 
-        level[src] = 1;
+        level[src] = 1;// O(1)
 
-        while (q.Count != 0)
+        while (q.Count != 0)// O(V+E)
         {
             if (level[dist] == 0)
             {
@@ -163,74 +163,58 @@ class graph
 
         return level;
     }
-    static void rs(int source, int destination, int[] level)
+    static void rs(int source, int destination, int[] level)//O(V+E)
     {
         HashSet<int> visited = new HashSet<int>();
-
         Tuple<int, int> e1;
-        Tuple<int, int> e2;
         Tuple<int, int> e3;
         Queue<int> q = new Queue<int>();
-        int[] parent = new int[level.Length];
-
-        int[] distance = new int[level.Length];
+        int[] parent = new int[level.Length];// O(V)
+        int[] distance = new int[level.Length];//O(V)
         q.Enqueue(destination);
         visited.Add(destination);
-
-        while (q.Count != 0)
-        {
-            int v = q.Dequeue();
+        while (q.Count != 0)// O(V+E)
+        {  int v = q.Dequeue();
             for (int i = 0; i < adj[v].Count; i++)
-            {
+            { 
                 int index = (int)adj[v][i];
-
                 if (level[index] != 0 && level[index] < level[v])
                 {
                     if (level[index] != level[source])
-                    {
-                        if (!visited.Contains(index))
-
-                        {
-                            q.Enqueue(index);
-                            visited.Add(index);
-                        }
+                    { if (!visited.Contains(index))
+                        {q.Enqueue(index);
+                         visited.Add(index); }
                     }
                     int min = Math.Min(destination, index);
                     int max = Math.Max(destination, index);
                     e1 = new Tuple<int, int>(min, max);
-
                     if (v != destination)
                     {
-                        int min1 = Math.Min(destination, v);
-                        int max1 = Math.Max(destination, v);
-                        e2 = new Tuple<int, int>(min1, max1);
                         int min2 = Math.Min(index, v);
                         int max2 = Math.Max(index, v);
                         e3 = new Tuple<int, int>(min2, max2);
-
                         int w = distance[v] + weight[e3];
-
                         if (w > distance[index])
-                        {
-                            distance[index] = w;
-                            parent[index] = v;
-                        }
+                        { distance[index] = w;
+                            parent[index] = v;}
                     }
                     else
-                    {
-                        distance[index] = weight[e1];
-                        parent[index] = v;
+                    {distance[index] = weight[e1];
+                      parent[index] = v;
                     }
                 }
             }
         }
         Console.WriteLine("rs = " + distance[source]);
+        chains(source,destination,parent);
+       
+    }
+    static void chains(int source , int destination, int [] parent)
+    {
         Console.Write("chain of movies = ");
         Queue<int> m = new Queue<int>();
-        Queue<int> a = new Queue<int>();
         m.Enqueue(source);
-        a.Enqueue(source);
-        while (m.Count > 0)
+        while (m.Count > 0)//O(V)
         {
             int d = m.Dequeue();
             int min = Math.Min(d, parent[d]);
@@ -245,14 +229,14 @@ class graph
         }
         Console.WriteLine();
         Console.Write("chain of actors = ");
-        while (a.Count > 0)
+        Queue<int> a = new Queue<int>();
+        a.Enqueue(source);
+        while (a.Count > 0) //O(v)
         {
             int d = a.Dequeue();
-
             Console.Write(revMap[d] + " -> ");
             if (parent[d] != destination)
             {
-
                 a.Enqueue(parent[d]);
             }
         }

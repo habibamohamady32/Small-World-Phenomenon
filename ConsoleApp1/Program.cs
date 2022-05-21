@@ -26,7 +26,7 @@ class graph
     static void read()//O(movies*V^2)
     {
         //sample
-        string text = File.ReadAllText(@"movies1.txt");//O()                                                                
+        string text = File.ReadAllText(@"movies1.txt");//O(1)                                                                
         //small case1
         //string text = File.ReadAllText(@"Movies193.txt");//O(1)
         //small case2
@@ -122,7 +122,7 @@ class graph
         // string text2 = File.ReadAllText(@"queries22.txt");
 
         string[] queries = text2.Trim().Split('\n');//O(n) Where n numbers of letters per line
-        for (int i = 0; i < queries.Length; i++)//O(M) where M number of queries
+        for (int i = 0; i < queries.Length; i++)//O(M*(V+E)) where M number of queries
         {
             string[] values = queries[i].Trim().Split('/');//O(n) complexity where n is the number of characters in the string.
             int src = map[values[0]];//O(1)
@@ -175,7 +175,7 @@ class graph
         int[] distance = new int[level.Length];//O(1)
         q.Enqueue(destination);//O(1)
         visited.Add(destination);//O(1) Till finishing capacity becomes O(V)
-        while (q.Count != 0)//O(1)
+        while (q.Count != 0)//O(V)
         {
             int v = q.Dequeue();//O(1)
             for (int i = 0; i < adj[v].Count; i++)//O(V+E)
@@ -225,7 +225,7 @@ class graph
         Console.Write("chain of movies = ");//O(1)
         Queue<int> m = new Queue<int>();//O(1)
         m.Enqueue(source);//O(1)
-        while (m.Count > 0)//O(1)
+        while (m.Count > 0)//O(V)
         {
             int d = m.Dequeue();//O(1)
             int min = Math.Min(d, parent[d]);//O(1)

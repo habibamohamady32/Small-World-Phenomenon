@@ -175,7 +175,7 @@ class graph
         int[] distance = new int[level.Length];//O(1)
         q.Enqueue(destination);//O(1)
         visited.Add(destination);//O(1) Till finishing capacity becomes O(V)
-        while (q.Count != 0)//O(V)
+        while (q.Count != 0)//O(1)
         {
             int v = q.Dequeue();//O(1)
             for (int i = 0; i < adj[v].Count; i++)//O(V+E)
